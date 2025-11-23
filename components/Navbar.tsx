@@ -47,10 +47,10 @@ export default function Navbar() {
               Contact
             </Link>
             <Link
-              href='/station'
+              href='/stations'
               className='block px-5 py-2 rounded-lg  hover:bg-blue-700 transition'
             >
-              Station
+              Stations
             </Link>
             <Link
               href='/my-bookings'

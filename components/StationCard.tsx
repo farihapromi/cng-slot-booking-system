@@ -7,7 +7,7 @@ export default function StationCard({ station }: { station: any }) {
       <p className='text-sm text-gray-600'>{station.address}</p>
       <div className='mt-3'>
         <Link
-          href={`/station/${station.id}`}
+          href={`/stations/${station.id}`}
           className='inline-block px-4 py-2 bg-blue-600 text-white rounded-md'
         >
           View & Book
