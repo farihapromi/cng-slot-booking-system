@@ -46,6 +46,18 @@ export default function Navbar() {
             >
               Contact
             </Link>
+            <Link
+              href='/station'
+              className='block px-5 py-2 rounded-lg  hover:bg-blue-700 transition'
+            >
+              Station
+            </Link>
+            <Link
+              href='/my-bookings'
+              className='block px-5 py-2 rounded-lg  hover:bg-blue-700 transition'
+            >
+              My Bookings
+            </Link>
 
             {/* Desktop Auth Buttons */}
             <SignedIn>
