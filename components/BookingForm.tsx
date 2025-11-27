@@ -2,11 +2,13 @@
 import { useUser } from '@clerk/nextjs';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function BookingForm({ stationId }: { stationId: string }) {
   const { user } = useUser(); // Get the logged-in user
   const [slotTime, setSlotTime] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,6 +37,7 @@ export default function BookingForm({ stationId }: { stationId: string }) {
       } else {
         toast.success('Booking successful!');
         setSlotTime('');
+        router.push('/my-bookings');
         // Optional: redirect to /my-bookings
         // window.location.href = '/my-bookings';
       }
