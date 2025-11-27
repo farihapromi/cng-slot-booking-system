@@ -11,12 +11,16 @@ export async function POST() {
   });
 
   if (!user) {
+    // Example: assign the first station in your DB to this admin
+    const station = await prisma.station.findFirst();
+
     user = await prisma.user.create({
       data: {
         clerkId: clerkUser.id,
         name: clerkUser.fullName,
         email: clerkUser.emailAddresses[0].emailAddress,
-        role: "DRIVER", // default role for new users
+        role: "ADMIN", // or "DRIVER"
+        stationId: station?.id || null, // assign station if admin
       },
     });
   }
