@@ -1,28 +1,42 @@
-// app/my-bookings/page.tsx (Next.js 13 app router)
 import { currentUser } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 import Navbar from '@/components/Navbar';
+import BookingCard from '@/components/BookingCard';
+import BookingCardRow from '@/components/BookingCardRow';
 
 export default async function MyBookings() {
-  const clerkUser = await currentUser();
-  if (!clerkUser)
-    return <p className='p-8'>Please login to view your bookings.</p>;
+  const user = await currentUser();
+  if (!user) return <p className='p-8'>Please login to view bookings.</p>;
 
-  // Find the corresponding User in your database
+  // Fetch user from DB
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: user.id },
   });
+  if (!dbUser) return <p className='p-8'>User not found in DB.</p>;
 
-  if (!dbUser) return <p className='p-8'>User not found in the database.</p>;
+  let bookings;
+  if (dbUser.role === 'DRIVER') {
+    // Drivers see only their bookings
+    bookings = await prisma.booking.findMany({
+      where: { userId: dbUser.id },
+      include: { station: true, user: true },
+      orderBy: { slotTime: 'desc' },
+    });
+  } else if (dbUser.role === 'ADMIN') {
+    // Admins see bookings for their station
+    bookings = await prisma.booking.findMany({
+      where: { stationId: dbUser.stationId },
+      include: { station: true, user: true },
+      orderBy: { slotTime: 'desc' },
+    });
+  } else {
+    // SUPER_ADMIN sees all bookings
+    bookings = await prisma.booking.findMany({
+      include: { station: true, user: true },
+      orderBy: { slotTime: 'desc' },
+    });
+  }
 
-  // Fetch bookings using the correct database user ID
-  const bookings = await prisma.booking.findMany({
-    where: { userId: dbUser.id },
-    include: { station: true },
-    orderBy: { slotTime: 'desc' },
-  });
-
-  // Split into upcoming and past bookings
   const now = new Date();
   const upcoming = bookings.filter((b) => b.slotTime > now);
   const past = bookings.filter((b) => b.slotTime <= now);
@@ -41,29 +55,7 @@ export default async function MyBookings() {
           ) : (
             <div className='grid md:grid-cols-2 gap-4'>
               {upcoming.map((b) => (
-                <div key={b.id} className='p-4 bg-white rounded shadow'>
-                  <p>
-                    <strong>Station:</strong> {b.station?.name}
-                  </p>
-                  <p>
-                    <strong>Slot:</strong>{' '}
-                    {new Date(b.slotTime).toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Status:</strong>{' '}
-                    <span
-                      className={`px-2 py-1 rounded text-white ${
-                        b.status === 'PENDING'
-                          ? 'bg-yellow-500'
-                          : b.status === 'COMPLETED'
-                          ? 'bg-green-500'
-                          : 'bg-red-500'
-                      }`}
-                    >
-                      {b.status}
-                    </span>
-                  </p>
-                </div>
+                <BookingCard key={b.id} booking={b} currentUser={dbUser} />
               ))}
             </div>
           )}
@@ -80,35 +72,22 @@ export default async function MyBookings() {
                 <thead className='bg-gray-200'>
                   <tr>
                     <th className='p-2 text-left'>Station</th>
+                    <th className='p-2 text-left'>User</th>
                     <th className='p-2 text-left'>Slot</th>
                     <th className='p-2 text-left'>Status</th>
                     <th className='p-2 text-left'>Booked At</th>
+                    {dbUser.role !== 'DRIVER' && (
+                      <th className='p-2'>Action</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   {past.map((b) => (
-                    <tr key={b.id} className='border-b'>
-                      <td className='p-2'>{b.station?.name}</td>
-                      <td className='p-2'>
-                        {new Date(b.slotTime).toLocaleString()}
-                      </td>
-                      <td className='p-2'>
-                        <span
-                          className={`px-2 py-1 rounded text-white ${
-                            b.status === 'PENDING'
-                              ? 'bg-yellow-500'
-                              : b.status === 'COMPLETED'
-                              ? 'bg-green-500'
-                              : 'bg-red-500'
-                          }`}
-                        >
-                          {b.status}
-                        </span>
-                      </td>
-                      <td className='p-2'>
-                        {new Date(b.createdAt).toLocaleString()}
-                      </td>
-                    </tr>
+                    <BookingCardRow
+                      key={b.id}
+                      booking={b}
+                      currentUser={dbUser}
+                    />
                   ))}
                 </tbody>
               </table>
