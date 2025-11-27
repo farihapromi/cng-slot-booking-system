@@ -1,6 +1,9 @@
+// components/StationCard.tsx
 import Link from 'next/link';
 
 export default function StationCard({ station }: { station: any }) {
+  if (!station?.id) return null; // safety check
+
   return (
     <div className='p-4 border rounded-lg shadow-sm bg-white'>
       <h3 className='text-lg font-semibold'>{station.name}</h3>

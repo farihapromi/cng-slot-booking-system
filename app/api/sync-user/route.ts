@@ -1,25 +1,24 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function POST() {
-  const user = await currentUser();
+  const clerkUser = await currentUser();
+  if (!clerkUser) return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
 
-  if (!user) return Response.json({ error: "Not authenticated" }, { status: 401 });
-
-  // Check if exists
-  const exists = await prisma.user.findUnique({
-    where: { clerkId: user.id },
+  let user = await prisma.user.findUnique({
+    where: { clerkId: clerkUser.id }, // ✅ now works
   });
 
-  if (!exists) {
-    await prisma.user.create({
+  if (!user) {
+    user = await prisma.user.create({
       data: {
-        clerkId: user.id,
-        name: user.fullName,
-        email: user.emailAddresses[0].emailAddress,
+        clerkId: clerkUser.id,
+        name: clerkUser.fullName,
+        email: clerkUser.emailAddresses[0].emailAddress,
+        
       },
     });
   }
 
-  return Response.json({ success: true });
+  return new Response(JSON.stringify({ success: true, user }));
 }

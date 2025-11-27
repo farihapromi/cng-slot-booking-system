@@ -1,34 +1,48 @@
 'use client';
+import { useUser } from '@clerk/nextjs';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function BookingForm({ stationId }: { stationId: string }) {
+  const { user } = useUser(); // Get the logged-in user
   const [slotTime, setSlotTime] = useState('');
-  const [msg, setMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setMsg('');
-
-    const res = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: 'demo', // replace with Clerk user.id
-        stationId,
-        slotTime,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      // if slot is unavailable
-      setMsg(data.error);
+    if (!user) {
+      toast.error('You must be logged in to book a slot.');
       return;
     }
 
-    setMsg('Booking confirmed!');
-    setSlotTime('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id, // <- here is the actual logged-in user ID
+          stationId,
+          slotTime,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || 'Slot not available');
+      } else {
+        toast.success('Booking successful!');
+        setSlotTime('');
+        // Optional: redirect to /my-bookings
+        // window.location.href = '/my-bookings';
+      }
+    } catch (err) {
+      toast.error('Network error');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -40,12 +54,13 @@ export default function BookingForm({ stationId }: { stationId: string }) {
         onChange={(e) => setSlotTime(e.target.value)}
         className='border p-2 w-full'
       />
-
-      <button className='bg-blue-600 text-white px-4 py-2 rounded'>
-        Book Slot
+      <button
+        type='submit'
+        className='bg-blue-600 text-white px-4 py-2 rounded'
+        disabled={loading}
+      >
+        {loading ? 'Booking...' : 'Book Slot'}
       </button>
-
-      {msg && <p className='text-red-500'>{msg}</p>}
     </form>
   );
 }
