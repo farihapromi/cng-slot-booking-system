@@ -1,22 +1,44 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   SignedIn,
   SignedOut,
   SignInButton,
   SignOutButton,
+  useUser,
 } from '@clerk/nextjs';
+import prisma from '@/lib/prisma';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null); // DRIVER or ADMIN
+  const { user } = useUser();
+
+  // useEffect(() => {
+  //   async function fetchRole() {
+  //     if (!user) return;
+  //     const res = await fetch(`/api/users/${user.id}/role`);
+  //     const data = await res.json();
+  //     setRole(data.role);
+  //   }
+  //   fetchRole();
+  // }, [user]);
+
+  useEffect(() => {
+    async function syncUser() {
+      const res = await fetch('/api/sync-user', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) setUserRole(data.user.role); // store in state
+    }
+    syncUser();
+  }, []);
 
   return (
     <nav className='bg-gray-100 shadow-md'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between h-16 items-center'>
-          {/* Logo */}
           <div className='flex-shrink-0'>
             <Link href='/'>
               <h1 className='text-2xl font-bold text-blue-600'>FuelEase</h1>
@@ -25,41 +47,50 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className='hidden md:flex items-center space-x-4 gap-2'>
-            {/* Navigation Links */}
             <Link
               href='/'
-              className='block px-5 py-2   rounded-lg hover:bg-blue-700 transition'
+              className='block px-5 py-2 rounded-lg hover:bg-blue-700 transition'
             >
               Home
             </Link>
-
             <Link
               href='/about'
-              className='block px-5 py-2 rounded-lg  hover:bg-blue-700 transition'
+              className='block px-5 py-2 rounded-lg hover:bg-blue-700 transition'
             >
               About
             </Link>
-
             <Link
               href='/contact'
-              className='block px-5 py-2 rounded-lg  hover:bg-blue-700 transition'
+              className='block px-5 py-2 rounded-lg hover:bg-blue-700 transition'
             >
               Contact
             </Link>
-            <Link
-              href='/stations'
-              className='block px-5 py-2 rounded-lg  hover:bg-blue-700 transition'
-            >
-              Stations
-            </Link>
-            <Link
-              href='/my-bookings'
-              className='block px-5 py-2 rounded-lg  hover:bg-blue-700 transition'
-            >
-              My Bookings
-            </Link>
 
-            {/* Desktop Auth Buttons */}
+            {/* Role-based links */}
+            {userRole === 'DRIVER' && (
+              <>
+                <Link
+                  href='/stations'
+                  className='block px-5 py-2 rounded-lg hover:bg-blue-700 transition'
+                >
+                  Stations
+                </Link>
+                <Link
+                  href='/my-bookings'
+                  className='block px-5 py-2 rounded-lg hover:bg-blue-700 transition'
+                >
+                  My Bookings
+                </Link>
+              </>
+            )}
+            {userRole === 'ADMIN' && (
+              <>
+                <Link href='/admin/dashboard'>Admin Dashboard</Link>
+                <Link href='/admin/create-station'>Create Station</Link>
+              </>
+            )}
+
+            {/* Auth Buttons */}
             <SignedIn>
               <SignOutButton>
                 <button className='px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition'>
@@ -98,22 +129,53 @@ export default function Navbar() {
           >
             Home
           </Link>
-
           <Link
             href='/about'
-            className='block px-5 py-3 rounded-lg   hover:bg-blue-700 transition'
+            className='block px-5 py-3 rounded-lg hover:bg-blue-700 transition'
           >
             About
           </Link>
-
           <Link
             href='/contact'
-            className='block px-5 py-3 rounded-lg  hover:bg-blue-700 transition'
+            className='block px-5 py-3 rounded-lg hover:bg-blue-700 transition'
           >
             Contact
           </Link>
 
-          {/* Mobile Auth */}
+          {role === 'DRIVER' && (
+            <>
+              <Link
+                href='/stations'
+                className='block px-5 py-3 rounded-lg hover:bg-blue-700 transition'
+              >
+                Stations
+              </Link>
+              <Link
+                href='/my-bookings'
+                className='block px-5 py-3 rounded-lg hover:bg-blue-700 transition'
+              >
+                My Bookings
+              </Link>
+            </>
+          )}
+          {role === 'ADMIN' && (
+            <>
+              <Link
+                href='/admin/dashboard'
+                className='block px-5 py-3 rounded-lg hover:bg-blue-700 transition'
+              >
+                Admin Dashboard
+              </Link>
+              <Link
+                href='/admin/create-station'
+                className='block px-5 py-3 rounded-lg hover:bg-blue-700 transition'
+              >
+                Create Station
+              </Link>
+            </>
+          )}
+
+          {/* Auth */}
           <SignedIn>
             <SignOutButton>
               <button className='w-full px-5 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition'>
