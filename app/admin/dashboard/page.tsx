@@ -67,47 +67,44 @@ export default function AdminDashboard() {
     <div className='min-h-screen bg-gray-100'>
       <Navbar />
       <Toaster position='top-right' />
-      <main className='container mx-auto py-8'>
-        <h1 className='text-3xl font-bold mb-6'>Admin Dashboard</h1>
+      <main className='container mx-auto py-8 flex flex-col items-center'>
+        <h1 className='text-3xl font-bold mb-10 p-6'>Admin Dashboard</h1>
 
         {bookings.length === 0 ? (
           <p>No bookings yet.</p>
         ) : (
-          <div className='overflow-x-auto bg-white rounded shadow'>
-            <table className='min-w-full divide-y divide-gray-200'>
+          <div className='w-full max-w-5xl bg-white rounded shadow overflow-x-auto p-4'>
+            <table className='min-w-full divide-y divide-gray-200 text-center '>
               <thead className='bg-gray-50'>
                 <tr>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-6 py-3 text-xs font-medium text-gray-500 uppercase'>
                     User
                   </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-6 py-3 text-xs font-medium text-gray-500 uppercase'>
                     Station
                   </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-6 py-3 text-xs font-medium text-gray-500 uppercase'>
                     Slot Time
                   </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-6 py-3 text-xs font-medium text-gray-500 uppercase'>
                     Status
                   </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-6 py-3 text-xs font-medium text-gray-500 uppercase'>
                     Actions
                   </th>
                 </tr>
               </thead>
+
               <tbody className='bg-white divide-y divide-gray-200'>
                 {bookings.map((b) => (
                   <tr key={b.id}>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      {b.user.name}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      {b.station.name}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
+                    <td className='px-6 py-4'>{b.user.name}</td>
+                    <td className='px-6 py-4'>{b.station.name}</td>
+                    <td className='px-6 py-4'>
                       {new Date(b.slotTime).toLocaleString()}
                     </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>{b.status}</td>
-                    <td className='px-6 py-4 whitespace-nowrap flex space-x-2'>
+                    <td className='px-6 py-4'>{b.status}</td>
+                    <td className='px-6 py-4 flex justify-center space-x-2'>
                       {b.status !== 'COMPLETED' && (
                         <button
                           className='bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700'

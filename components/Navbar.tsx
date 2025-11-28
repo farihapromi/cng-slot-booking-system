@@ -85,8 +85,18 @@ export default function Navbar() {
             )}
             {userRole === 'ADMIN' && (
               <>
-                <Link href='/admin/dashboard'>Admin Dashboard</Link>
-                <Link href='/admin/create-station'>Create Station</Link>
+                <Link
+                  href='/admin/dashboard'
+                  className='block px-5 py-2 rounded-lg hover:bg-blue-700 transition'
+                >
+                  Admin Dashboard
+                </Link>
+                <Link
+                  href='/admin/create-station'
+                  className='block px-5 py-2 rounded-lg hover:bg-blue-700 transition'
+                >
+                  Create Station
+                </Link>
               </>
             )}
 
