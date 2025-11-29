@@ -59,11 +59,6 @@ export default function HomePage() {
       {/* Imported About & Contact */}
       <AboutSection />
       <ContactSection />
-
-      {/* Footer */}
-      <footer className='bg-gray-800 text-white text-center py-6 mt-16'>
-        &copy; 2025 FuelEase. All rights reserved.
-      </footer>
     </div>
   );
 }
