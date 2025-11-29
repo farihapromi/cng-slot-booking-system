@@ -111,7 +111,7 @@ export default function Navbar() {
 
             <SignedOut>
               <SignInButton>
-                <button className='px-8 py-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition'>
+                <button className='px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition'>
                   Sign In
                 </button>
               </SignInButton>
