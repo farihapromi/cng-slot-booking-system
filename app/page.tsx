@@ -2,10 +2,6 @@
 
 import Navbar from '@/components/Navbar';
 
-import Contact from './contact/page';
-import Link from 'next/link';
-import About from './about/page';
-
 export default function HomePage() {
   return (
     <div className='min-h-screen bg-gray-50'>
