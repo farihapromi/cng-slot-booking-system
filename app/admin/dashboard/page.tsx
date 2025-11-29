@@ -53,6 +53,7 @@ export default function AdminDashboard() {
       try {
         const res = await fetch('/api/admin/stations');
         const data = await res.json();
+        if (res.ok) setStations(data.stations);
         if (!res.ok) toast.error(data.error || 'Failed to fetch stations');
         else setStations(data.stations);
       } catch (err) {

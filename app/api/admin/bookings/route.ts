@@ -1,37 +1,29 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { currentUser } from '@clerk/nextjs/server';
+// app/api/admin/bookings/route.ts
+import { NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";
 
-export async function GET({ params }: { params: { id: string } }) {
+export async function GET() {
   try {
-    const user = await currentUser();
-    if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const clerkUser = await currentUser();
+    if (!clerkUser) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-    const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } });
-    if (!dbUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUser.id },
+      include: { stations: true } // include all stations admin manages
+    });
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Only admin can access
-    if (dbUser.role !== 'ADMIN' && dbUser.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
-    }
-
-    const stationId = params.id;
-    if (!stationId) {
-      return NextResponse.json({ error: 'Station ID is required' }, { status: 400 });
-    }
-
-    const station = await prisma.station.findUnique({
-      where: { id: stationId },
-      include: { bookings: true },
+    // Get bookings for all stations the admin manages
+    const bookings = await prisma.booking.findMany({
+      where: { stationId: { in: user.stations.map(s => s.id) } },
+      include: { user: true, station: true },
+      orderBy: { slotTime: "asc" }
     });
 
-    if (!station) {
-      return NextResponse.json({ error: 'Station not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ station });
+    return NextResponse.json({ bookings });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

@@ -1,41 +1,53 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // import router
 import Navbar from '@/components/Navbar';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function CreateStation() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [capacity, setCapacity] = useState(1);
   const [message, setMessage] = useState('');
+  const router = useRouter(); // initialize router
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMessage('');
     try {
-      const res = await fetch('/api/stations', {
+      const res = await fetch('/api/admin/stations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, address, capacity }),
       });
+
       const data = await res.json();
-      if (!res.ok) setMessage(data.error || 'Failed');
-      else {
-        setMessage('Station created successfully');
+
+      if (!res.ok) {
+        setMessage(data.error || 'Failed');
+        toast.error(data.error || 'Failed to create station');
+      } else {
+        toast.success('Station created successfully!');
         setName('');
         setAddress('');
         setCapacity(1);
+
+        // Navigate to the newly created station's manage page
+        router.push(`/stations/${data.station.id}`);
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage('Network error');
+      toast.error('Network error');
     }
   }
 
   return (
     <div>
       <Navbar />
+      <Toaster position='top-right' />
 
-      {/* Center form */}
       <main className='flex justify-center items-center min-h-screen bg-gray-100 px-4'>
         <div className='bg-white shadow-lg rounded-xl p-8 w-full max-w-lg'>
           <h1 className='text-3xl font-bold mb-6 text-center'>
@@ -43,7 +55,6 @@ export default function CreateStation() {
           </h1>
 
           <form onSubmit={submit} className='space-y-4'>
-            {/* Station Name */}
             <div>
               <label className='block mb-2 font-medium'>Station Name</label>
               <input
@@ -56,7 +67,6 @@ export default function CreateStation() {
               />
             </div>
 
-            {/* Address */}
             <div>
               <label className='block mb-2 font-medium'>Address</label>
               <input
@@ -68,7 +78,6 @@ export default function CreateStation() {
               />
             </div>
 
-            {/* Capacity */}
             <div>
               <label className='block mb-2 font-medium'>Capacity</label>
               <input
@@ -82,10 +91,9 @@ export default function CreateStation() {
               />
             </div>
 
-            {/* Button */}
             <button
               type='submit'
-              className='w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold transition '
+              className='w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold transition'
             >
               Create Station
             </button>

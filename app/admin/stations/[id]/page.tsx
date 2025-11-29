@@ -44,7 +44,6 @@ export default function ManageStation() {
         }
         setStation(stationData.station);
 
-        // Fetch bookings for this station
         const resBookings = await fetch(
           `/api/admin/bookings?stationId=${stationId}`
         );
