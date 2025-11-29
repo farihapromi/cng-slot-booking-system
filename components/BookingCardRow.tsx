@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-export default function BookingCard({ booking, currentUser }) {
+export default function BookingCardRow({ booking, currentUser }) {
   const canUpdate =
     currentUser.role === 'ADMIN' && currentUser.stationId === booking.stationId;
 
@@ -11,7 +11,9 @@ export default function BookingCard({ booking, currentUser }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
+
     const data = await res.json();
+
     if (data.success) {
       window.location.reload();
     } else {
@@ -20,18 +22,14 @@ export default function BookingCard({ booking, currentUser }) {
   }
 
   return (
-    <div className='p-4 bg-white rounded shadow'>
-      <p>
-        <strong>Station:</strong> {booking.station?.name}
-      </p>
-      <p>
-        <strong>User:</strong> {booking.user?.name}
-      </p>
-      <p>
-        <strong>Slot:</strong> {new Date(booking.slotTime).toLocaleString()}
-      </p>
-      <p>
-        <strong>Status:</strong>{' '}
+    <tr className='border-b'>
+      <td className='p-2'>{booking.station?.name}</td>
+
+      <td className='p-2'>{booking.user?.name}</td>
+
+      <td className='p-2'>{new Date(booking.slotTime).toLocaleString()}</td>
+
+      <td className='p-2'>
         <span
           className={`px-2 py-1 rounded text-white ${
             booking.status === 'PENDING'
@@ -43,23 +41,32 @@ export default function BookingCard({ booking, currentUser }) {
         >
           {booking.status}
         </span>
-      </p>
-      {canUpdate && booking.status === 'PENDING' && (
-        <div className='mt-2 space-x-2'>
-          <button
-            className='px-2 py-1 bg-green-500 text-white rounded'
-            onClick={() => updateStatus('COMPLETED')}
-          >
-            Complete
-          </button>
-          <button
-            className='px-2 py-1 bg-red-500 text-white rounded'
-            onClick={() => updateStatus('CANCELLED')}
-          >
-            Cancel
-          </button>
-        </div>
+      </td>
+
+      {/*  Booked At */}
+      <td className='p-2'>{new Date(booking.createdAt).toLocaleString()}</td>
+
+      {/*Action (only for admins) */}
+      {currentUser.role !== 'DRIVER' && (
+        <td className='p-2 space-x-2'>
+          {booking.status === 'PENDING' && canUpdate && (
+            <>
+              <button
+                className='px-2 py-1 bg-green-500 text-white rounded'
+                onClick={() => updateStatus('COMPLETED')}
+              >
+                Complete
+              </button>
+              <button
+                className='px-2 py-1 bg-red-500 text-white rounded'
+                onClick={() => updateStatus('CANCELLED')}
+              >
+                Cancel
+              </button>
+            </>
+          )}
+        </td>
       )}
-    </div>
+    </tr>
   );
 }

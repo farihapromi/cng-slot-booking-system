@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚗⛽ FuelEase – CNG & Petrol Station Slot Booking System
 
-## Getting Started
+FuelEase is a modern web application that allows customers to **book time slots** at **CNG and Petrol stations**, reducing long queues and ensuring efficient service.  
+Admins can manage stations, control capacity, monitor bookings, and update booking statuses.
 
-First, run the development server:
+Built with **Next.js, Prisma, Neon Database, Clerk Authentication, and TailwindCSS**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ⭐ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🔹 User Features
+- Create an account & log in securely using **Clerk Auth**
+- View available CNG/Petrol stations
+- Select a time slot for refueling
+- Prevent double-booking of the same time
+- View personal bookings
+- Receive approval/cancellation updates from admin
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🔹 Admin Features
+- Create new CNG/Petrol stations  
+- Set station capacity (vehicles per slot)  
+- View all bookings from all users  
+- Approve, complete, or cancel bookings  
+- Manage station and user data  
+- Prevent overbooking based on station capacity  
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Category   | Technology |
+|-----------|------------|
+| Framework | Next.js 14 (App Router) |
+| Database  | PostgreSQL (Neon Serverless) |
+| ORM       | Prisma |
+| Auth      | Clerk |
+| Styling   | TailwindCSS |
+| Deployment| Vercel (recommended) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📌 System Workflow
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1️⃣ Admin creates a station
+- Name, Address, Capacity  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2️⃣ User logs in using Clerk
+- Clerk ID is synced to the database
+- User profile is created automatically
+
+### 3️⃣ User books a refueling slot
+- Select station and time slot  
+- System checks capacity & duplicate bookings  
+
+### 4️⃣ Admin reviews bookings
+- Approve, Complete, Cancel  
+
+### 5️⃣ Users see updated booking status
+
+---
+
+
+
