@@ -5,13 +5,19 @@ export default function StationCard({ station }: { station: any }) {
   if (!station?.id) return null; // safety check
 
   return (
-    <div className='p-4 border rounded-lg shadow-sm bg-white'>
-      <h3 className='text-lg font-semibold'>{station.name}</h3>
-      <p className='text-sm text-gray-600'>{station.address}</p>
-      <div className='mt-3'>
+    <div className='p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 hover:scale-105 duration-300'>
+      <div className='flex flex-col h-full justify-between'>
+        <div>
+          <h3 className='text-xl font-bold text-gray-800 mb-2'>
+            {station.name}
+          </h3>
+          <p className='text-gray-500 mb-4'>{station.address}</p>
+          <p className='text-sm text-gray-400'>Capacity: {station.capacity}</p>
+        </div>
+
         <Link
           href={`/stations/${station.id}`}
-          className='inline-block px-4 py-2 bg-blue-600 text-white rounded-md'
+          className='mt-4 w-full inline-block text-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition'
         >
           View & Book
         </Link>
