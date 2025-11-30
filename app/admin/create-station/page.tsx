@@ -34,7 +34,7 @@ export default function CreateStation() {
         setCapacity(1);
 
         // Navigate to the newly created station's manage page
-        router.push(`/stations/${data.station.id}`);
+        router.push(`/admin/stations`);
       }
     } catch (err) {
       console.error(err);
@@ -84,8 +84,11 @@ export default function CreateStation() {
                 type='number'
                 placeholder='Capacity'
                 min={1}
-                value={capacity}
-                onChange={(e) => setCapacity(parseInt(e.target.value))}
+                value={capacity || ''} // <- fix NaN error
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  setCapacity(isNaN(val) ? 1 : val); // default to 1 if NaN
+                }}
                 required
                 className='w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none'
               />

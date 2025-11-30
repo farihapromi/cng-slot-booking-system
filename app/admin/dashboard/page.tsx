@@ -22,6 +22,7 @@ export default function AdminDashboard() {
       try {
         const res = await fetch('/api/admin/bookings');
         const data = await res.json();
+        console.log(data);
         if (!res.ok) toast.error(data.error || 'Failed to fetch bookings');
         else setBookings(data.bookings);
       } catch (err) {
@@ -138,7 +139,7 @@ export default function AdminDashboard() {
                       <tbody className='bg-white divide-y divide-gray-200'>
                         {bookings.map((b) => (
                           <tr key={b.id}>
-                            <td className='px-6 py-4'>{b.user.name}</td>
+                            <td className='px-6 py-4'>{b?.user?.name}</td>
                             <td className='px-6 py-4'>{b.station.name}</td>
                             <td className='px-6 py-4'>
                               {new Date(b.slotTime).toLocaleString()}

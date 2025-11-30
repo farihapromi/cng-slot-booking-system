@@ -19,16 +19,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
     // Create new station and connect to admin
+    // const station = await prisma.station.create({
+    //   data: {
+    //     name,
+    //     address,
+    //     capacity,
+    //     admins: {
+    //       connect: { id: user.id } // link this station to admin
+    //     },
+    //   },
+    // });
+    console.log("Admin user:", user.id, user.name);
+
     const station = await prisma.station.create({
-      data: {
-        name,
-        address,
-        capacity,
-        admins: {
-          connect: { id: user.id } // link this station to admin
-        },
-      },
-    });
+  data: {
+    name,
+    address,
+    capacity,
+    admins: { connect: { id: user.id } ,
+    
+  }, // link admin
+
+  },
+    include: { admins: true },
+});
+console.log("Station created with admins:", station);
+
+
 
     return NextResponse.json({ success: true, station });
   } catch (err) {
