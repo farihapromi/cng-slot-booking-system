@@ -1,35 +1,33 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
-export async function PUT(req: Request) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    const { id } = params;
+    const { status } = await req.json();
+
+    if (!["PENDING", "COMPLETED", "CANCELLED"].includes(status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
+
+    const clerkUser = await currentUser();
+    if (!clerkUser)
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
     const admin = await prisma.user.findUnique({
       where: { clerkId: clerkUser.id },
-      include: { stations: true }
+      include: { stations: true },
     });
 
-    if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 });
-    }
+    if (!admin) return NextResponse.json({ error: "Admin not found" }, { status: 404 });
 
-    const { id, status } = await req.json();
+    const booking = await prisma.booking.findUnique({ where: { id } });
+    if (!booking) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
 
-    // Get booking
-    const booking = await prisma.booking.findUnique({
-      where: { id },
-    });
-
-    if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-    }
-
-    // Check if admin manages the station of this booking
     if (!admin.stations.some((s) => s.id === booking.stationId)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -39,7 +37,7 @@ export async function PUT(req: Request) {
       data: { status },
     });
 
-    return NextResponse.json(updatedBooking);
+    return NextResponse.json({ success: true, booking: updatedBooking });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
