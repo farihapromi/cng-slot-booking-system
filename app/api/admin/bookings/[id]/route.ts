@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import  { NextRequest,NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function PUT(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
