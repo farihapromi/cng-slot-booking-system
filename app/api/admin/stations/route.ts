@@ -56,7 +56,7 @@ export async function GET() {
   if (!dbUser) 
     return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  if (dbUser.role !== "ADMIN" && dbUser.role !== "SUPER_ADMIN")
+  if (dbUser.role !== "ADMIN" )
     return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
   let stations;

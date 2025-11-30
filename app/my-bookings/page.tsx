@@ -8,29 +8,34 @@ export default async function MyBookings() {
   const user = await currentUser();
   if (!user) return <p className='p-8'>Please login to view bookings.</p>;
 
-  // Fetch user from DB
   const dbUser = await prisma.user.findUnique({
     where: { clerkId: user.id },
+    include: { stations: true },
   });
+
   if (!dbUser) return <p className='p-8'>User not found in DB.</p>;
 
-  let bookings;
+  let bookings = [];
+
   if (dbUser.role === 'DRIVER') {
-    // Drivers see only their bookings
+    // Drivers see their own bookings
     bookings = await prisma.booking.findMany({
       where: { userId: dbUser.id },
       include: { station: true, user: true },
       orderBy: { slotTime: 'desc' },
     });
   } else if (dbUser.role === 'ADMIN') {
-    // Admins see bookings for their station
+    // Admin → can manage multiple stations
+    const stationIds = dbUser.stations.map((s) => s.id);
+
     bookings = await prisma.booking.findMany({
-      where: { stationId: dbUser.stationId },
+      where: {
+        stationId: { in: stationIds },
+      },
       include: { station: true, user: true },
       orderBy: { slotTime: 'desc' },
     });
   } else {
-    // SUPER_ADMIN sees all bookings
     bookings = await prisma.booking.findMany({
       include: { station: true, user: true },
       orderBy: { slotTime: 'desc' },

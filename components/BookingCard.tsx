@@ -1,23 +1,14 @@
 'use client';
 import React from 'react';
-
-export default function BookingCard({ booking, currentUser }) {
+export default function BookingCard({
+  booking,
+  currentUser,
+}: {
+  booking: any;
+  currentUser: any;
+}) {
   const canUpdate =
     currentUser.role === 'ADMIN' && currentUser.stationId === booking.stationId;
-
-  async function updateStatus(status) {
-    const res = await fetch(`/api/bookings/${booking.id}/checkin`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      window.location.reload();
-    } else {
-      alert(data.error || 'Error updating booking');
-    }
-  }
 
   return (
     <div className='p-4 bg-white rounded shadow'>
@@ -46,16 +37,10 @@ export default function BookingCard({ booking, currentUser }) {
       </p>
       {canUpdate && booking.status === 'PENDING' && (
         <div className='mt-2 space-x-2'>
-          <button
-            className='px-2 py-1 bg-green-500 text-white rounded'
-            onClick={() => updateStatus('COMPLETED')}
-          >
+          <button className='px-2 py-1 bg-green-500 text-white rounded'>
             Complete
           </button>
-          <button
-            className='px-2 py-1 bg-red-500 text-white rounded'
-            onClick={() => updateStatus('CANCELLED')}
-          >
+          <button className='px-2 py-1 bg-red-500 text-white rounded'>
             Cancel
           </button>
         </div>

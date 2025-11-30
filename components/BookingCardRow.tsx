@@ -1,25 +1,16 @@
 'use client';
 import React from 'react';
 
-export default function BookingCardRow({ booking, currentUser }) {
+export default function BookingCardRow({
+  booking,
+  currentUser,
+}: {
+  booking: any;
+  currentUser: any;
+}) {
   const canUpdate =
-    currentUser.role === 'ADMIN' && currentUser.stationId === booking.stationId;
-
-  async function updateStatus(status) {
-    const res = await fetch(`/api/bookings/${booking.id}/checkin`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      window.location.reload();
-    } else {
-      alert(data.error || 'Error updating booking');
-    }
-  }
+    currentUser.role === 'ADMIN' &&
+    currentUser.stations?.some((s: any) => s.id === booking.stationId);
 
   return (
     <tr className='border-b'>
@@ -43,24 +34,18 @@ export default function BookingCardRow({ booking, currentUser }) {
         </span>
       </td>
 
-      {/*  Booked At */}
+      {/* Booked At */}
       <td className='p-2'>{new Date(booking.createdAt).toLocaleString()}</td>
 
-      {/*Action (only for admins) */}
+      {/* Admin Actions */}
       {currentUser.role !== 'DRIVER' && (
         <td className='p-2 space-x-2'>
           {booking.status === 'PENDING' && canUpdate && (
             <>
-              <button
-                className='px-2 py-1 bg-green-500 text-white rounded'
-                onClick={() => updateStatus('COMPLETED')}
-              >
+              <button className='px-2 py-1 bg-green-500 text-white rounded'>
                 Complete
               </button>
-              <button
-                className='px-2 py-1 bg-red-500 text-white rounded'
-                onClick={() => updateStatus('CANCELLED')}
-              >
+              <button className='px-2 py-1 bg-red-500 text-white rounded'>
                 Cancel
               </button>
             </>

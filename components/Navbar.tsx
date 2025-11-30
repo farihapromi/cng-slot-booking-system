@@ -142,7 +142,7 @@ export default function Navbar() {
             Contact
           </Link>
 
-          {role === 'DRIVER' && (
+          {userRole === 'DRIVER' && (
             <>
               <Link
                 href='/stations'
@@ -158,7 +158,7 @@ export default function Navbar() {
               </Link>
             </>
           )}
-          {role === 'ADMIN' && (
+          {userRole === 'ADMIN' && (
             <>
               <Link
                 href='/admin/dashboard'

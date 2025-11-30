@@ -20,7 +20,11 @@ export async function POST() {
         name: clerkUser.fullName,
         email: clerkUser.emailAddresses[0].emailAddress,
         role: "ADMIN", // or "DRIVER"
-        stationId: station?.id || null, 
+      
+        stations: {
+  connect: station ? { id: station.id } : undefined,
+}
+
       },
     });
   }
