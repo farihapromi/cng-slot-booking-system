@@ -4,19 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 
-interface Booking {
-  id: string;
-  user: { name: string };
-  slotTime: string;
-  status: string;
-}
-
-interface Station {
-  id: string;
-  name: string;
-  address: string;
-  capacity: number;
-}
+import { Booking } from '@/types/booking';
+import { Station } from '@/types/station';
 
 export default function ManageStation() {
   const params = useParams();
@@ -29,7 +18,8 @@ export default function ManageStation() {
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [capacity, setCapacity] = useState<number>(0);
+  //const [capacity, setCapacity] = useState<number>(0);
+  const [capacity, setCapacity] = useState(''); // initialize as empty string
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -57,22 +47,30 @@ export default function ManageStation() {
 
   // Update station
   const handleUpdate = async () => {
+    if (!name || !address || !capacity) {
+      toast.error('All fields are required');
+      return;
+    }
+
     setUpdating(true);
     try {
       const res = await fetch(`/api/admin/stations/${stationId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, address, capacity }),
+        body: JSON.stringify({
+          name,
+          address,
+          capacity: Number(capacity), // convert here
+        }),
       });
-      const data = await res.json();
 
+      const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setStation(data.station);
       toast.success('Station updated successfully!');
-      router.push('/admin/dashboard');
+      router.push('/admin/dashboard?tab=stations'); // go back to stations list
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || 'Failed to update station');
     } finally {
       setUpdating(false);
     }
@@ -129,10 +127,9 @@ export default function ManageStation() {
         <input
           type='number'
           value={capacity}
-          onChange={(e) => setCapacity(Number(e.target.value))}
+          onChange={(e) => setCapacity(e.target.value)} // keep string
           className='border p-2 rounded w-full mb-4'
         />
-
         <div className='flex gap-4'>
           <button
             onClick={handleUpdate}
