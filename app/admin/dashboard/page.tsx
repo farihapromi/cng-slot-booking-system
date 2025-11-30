@@ -5,20 +5,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 
-interface Booking {
-  id: string;
-  user: { name: string };
-  station: { name: string };
-  slotTime: string;
-  status: string;
-}
-
-interface Station {
-  id: string;
-  name: string;
-  address: string;
-  capacity: number;
-}
+import { Station } from '@/types/station';
+import { Booking } from '@/types/booking';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'stations'>(

@@ -22,46 +22,30 @@ export default function ManageStation() {
   const params = useParams();
   const stationId = params?.id; // safe optional chaining
 
+  //console.log('API params:', params);
+  //console.log(stationId);
+
   const [station, setStation] = useState<Station | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!stationId) {
-      toast.error('Station ID is missing.');
-      setLoading(false);
-      return;
-    }
-
     async function fetchData() {
       try {
-        // Fetch station info
         const resStation = await fetch(`/api/admin/stations/${stationId}`);
         const stationData = await resStation.json();
 
-        if (!resStation.ok) {
-          throw new Error(stationData.error || 'Failed to fetch station');
-        }
+        if (!resStation.ok) throw new Error(stationData.error);
+
         setStation(stationData.station);
-
-        const resBookings = await fetch(
-          `/api/admin/bookings?stationId=${stationId}`
-        );
-        const bookingsData = await resBookings.json();
-
-        if (!resBookings.ok) {
-          throw new Error(bookingsData.error || 'Failed to fetch bookings');
-        }
-        setBookings(bookingsData.bookings);
       } catch (err: any) {
-        console.error(err);
-        toast.error(err.message || 'Something went wrong');
+        toast.error(err.message);
       } finally {
-        setLoading(false);
+        setLoading(false); // ← VERY IMPORTANT
       }
     }
 
-    fetchData();
+    if (stationId) fetchData();
   }, [stationId]);
 
   if (loading) return <p className='p-6'>Loading station info...</p>;

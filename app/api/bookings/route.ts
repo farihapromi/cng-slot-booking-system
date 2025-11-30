@@ -1,42 +1,44 @@
-import prisma from '@/lib/prisma';
+// app/api/admin/bookings/route.ts
+import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";
 
-export async function POST(req: Request) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
+export async function GET() {
+  try {
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
 
-  // Ensure user exists in PostgreSQL
-  let user = await prisma.user.findUnique({ where: { clerkId: clerkUser.id } });
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        clerkId: clerkUser.id,
-        name: clerkUser.fullName,
-        email: clerkUser.emailAddresses[0].emailAddress,
-      },
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUser.id },
+      include: { stations: true }, // ❗ FETCH stations admin manages
     });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ❗ Get all stations this admin manages
+    const stationIds = user.stations.map((s) => s.id);
+
+    console.log("Admin manages stations:", stationIds);
+
+    // ❗ Fetch bookings for only those stations
+    const bookings = await prisma.booking.findMany({
+      where: {
+        stationId: { in: stationIds },
+      },
+      include: {
+        user: true,
+        station: true,
+      },
+      orderBy: { slotTime: "asc" },
+    });
+
+    return NextResponse.json({ bookings });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
-
-  const { stationId, slotTime } = await req.json();
-
-  if (!stationId || !slotTime) {
-    return new Response(JSON.stringify({ error: "Missing data" }), { status: 400 });
-  }
-
-  // Check slot availability
-  const count = await prisma.booking.count({
-    where: { stationId, slotTime: new Date(slotTime), status: 'PENDING' },
-  });
-
-  const station = await prisma.station.findUnique({ where: { id: stationId } });
-  if (!station) return new Response(JSON.stringify({ error: "Station not found" }), { status: 404 });
-
-  if (count >= station.capacity) return new Response(JSON.stringify({ error: "Slot full" }), { status: 400 });
-
-  // Create booking
-  const booking = await prisma.booking.create({
-    data: { userId: user.id, stationId, slotTime: new Date(slotTime) },
-  });
-
-  return new Response(JSON.stringify(booking), { status: 200 });
 }

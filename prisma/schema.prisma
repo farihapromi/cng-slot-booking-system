@@ -8,12 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  clerkId   String    @unique
-  name      String?
-  email     String?
-  role      String    @default("DRIVER") // DRIVER | ADMIN | SUPER_ADMIN
-  stations  Station[] @relation("AdminStations") // admin can manage multiple stations
+  id       String    @id @default(uuid())
+  clerkId  String    @unique
+  name     String?
+  email    String?
+  role     String    @default("DRIVER") // DRIVER | ADMIN | SUPER_ADMIN
+  //stations  Station[] @relation("AdminStations")
+  // admin can manage multiple stations
+  stations Station[] @relation("AdminStations", references: [id])
+
   bookings  Booking[]
   createdAt DateTime  @default(now())
 }

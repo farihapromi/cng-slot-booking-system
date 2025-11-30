@@ -4,34 +4,48 @@ import prisma from "@/lib/prisma";
 
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string }> } // params is a Promise
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const resolvedParams = await params; // ✅ unwrap the promise
-    const bookingId = resolvedParams.id;
+    const { id: bookingId } = await params;
 
-    if (!bookingId) {
+    if (!bookingId)
       return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
-    }
 
-    const user = await currentUser();
-    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    const clerkUser = await currentUser();
+    if (!clerkUser)
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-    const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } });
-    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUser.id },
+      include: { stations: true },
+    });
 
-    if (dbUser.role !== "ADMIN") {
+    if (!user)
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
-    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
-    if (!booking) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+    if (!booking)
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
 
-    if (dbUser.stationId !== booking.stationId) {
-      return NextResponse.json({ error: "Not authorized for this station" }, { status: 403 });
+    // SUPER ADMIN can update any booking
+    if (user.role !== "SUPER_ADMIN") {
+      if (!user.stations.some((s) => s.id === booking.stationId)) {
+        return NextResponse.json(
+          { error: "Not authorized for this station" },
+          { status: 403 }
+        );
+      }
     }
 
     const { status } = await req.json();
+
     if (!["PENDING", "COMPLETED", "CANCELLED"].includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
