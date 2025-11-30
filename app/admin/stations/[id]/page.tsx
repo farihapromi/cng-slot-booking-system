@@ -70,6 +70,7 @@ export default function ManageStation() {
 
       setStation(data.station);
       toast.success('Station updated successfully!');
+      router.push('/admin/dashboard');
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -77,7 +78,6 @@ export default function ManageStation() {
     }
   };
 
-  // Delete station
   // Delete station
   const handleDelete = async () => {
     try {

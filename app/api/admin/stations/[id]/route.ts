@@ -25,9 +25,9 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
-// UPDATE station
-export async function PUT(req: Request, ctx: { params: { id: string } }) {
-  const { id } = ctx.params;
+//update
+export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params; // await params
   const body = await req.json();
   const { name, address, capacity } = body;
 
@@ -35,12 +35,16 @@ export async function PUT(req: Request, ctx: { params: { id: string } }) {
     return NextResponse.json({ error: "All fields required" }, { status: 400 });
   }
 
-  const updatedStation = await prisma.station.update({
-    where: { id },
-    data: { name, address, capacity: Number(capacity) },
-  });
+  try {
+    const updatedStation = await prisma.station.update({
+      where: { id },
+      data: { name, address, capacity: Number(capacity) },
+    });
 
-  return NextResponse.json({ station: updatedStation });
+    return NextResponse.json({ station: updatedStation });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to update station' }, { status: 500 });
+  }
 }
 
 

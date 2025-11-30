@@ -10,7 +10,7 @@ import { Booking } from '@/types/booking';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'stations'>(
-    'bookings'
+    'stations'
   );
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [stations, setStations] = useState<Station[]>([]);
