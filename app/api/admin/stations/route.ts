@@ -18,18 +18,7 @@ export async function POST(req: Request) {
     if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
-    // Create new station and connect to admin
-    // const station = await prisma.station.create({
-    //   data: {
-    //     name,
-    //     address,
-    //     capacity,
-    //     admins: {
-    //       connect: { id: user.id } // link this station to admin
-    //     },
-    //   },
-    // });
-    console.log("Admin user:", user.id, user.name);
+    
 
     const station = await prisma.station.create({
   data: {
@@ -61,7 +50,7 @@ export async function GET() {
 
   const dbUser = await prisma.user.findUnique({ 
     where: { clerkId: clerkUser.id },
-    include: { stations: true } // include stations this admin manages
+    include: { stations: true } 
   });
 
   if (!dbUser) 
@@ -73,13 +62,13 @@ export async function GET() {
   let stations;
 
   if (dbUser.role === "ADMIN") {
-    // SUPER_ADMIN can see all stations
+   
     stations = await prisma.station.findMany({
       include: { admins: true },
       orderBy: { createdAt: "desc" },
     });
   } else {
-    // NORMAL ADMIN → only stations they manage
+   
     stations = dbUser.stations;
   }
 

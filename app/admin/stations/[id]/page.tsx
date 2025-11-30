@@ -19,7 +19,7 @@ export default function ManageStation() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   //const [capacity, setCapacity] = useState<number>(0);
-  const [capacity, setCapacity] = useState(''); // initialize as empty string
+  const [capacity, setCapacity] = useState('');
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -105,7 +105,6 @@ export default function ManageStation() {
         Manage Station: {station.name}
       </h1>
 
-      {/* Editable Form */}
       <div className='mb-6 bg-white p-4 rounded shadow'>
         <label className='block mb-2'>Name:</label>
         <input
@@ -127,7 +126,7 @@ export default function ManageStation() {
         <input
           type='number'
           value={capacity}
-          onChange={(e) => setCapacity(e.target.value)} // keep string
+          onChange={(e) => setCapacity(e.target.value)}
           className='border p-2 rounded w-full mb-4'
         />
         <div className='flex gap-4'>

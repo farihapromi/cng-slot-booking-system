@@ -19,7 +19,7 @@ export async function GET() {
 
 
     const whereClause =
-      admin.role === "SUPER_ADMIN" ? {} : { stationId: { in: stationIds } };
+      admin.role === "ADMIN" ? {} : { stationId: { in: stationIds } };
 
     const bookings = await prisma.booking.findMany({
       where: whereClause,

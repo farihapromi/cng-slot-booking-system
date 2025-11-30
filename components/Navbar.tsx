@@ -16,16 +16,6 @@ export default function Navbar() {
   const [userRole, setUserRole] = useState<string | null>(null); // DRIVER or ADMIN
   const { user } = useUser();
 
-  // useEffect(() => {
-  //   async function fetchRole() {
-  //     if (!user) return;
-  //     const res = await fetch(`/api/users/${user.id}/role`);
-  //     const data = await res.json();
-  //     setRole(data.role);
-  //   }
-  //   fetchRole();
-  // }, [user]);
-
   useEffect(() => {
     async function syncUser() {
       const res = await fetch('/api/sync-user', { method: 'POST' });

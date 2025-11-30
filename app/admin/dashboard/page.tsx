@@ -15,6 +15,8 @@ export default function AdminDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [loadingStations, setLoadingStations] = useState(true);
 
   // Fetch bookings
   useEffect(() => {
@@ -22,35 +24,32 @@ export default function AdminDashboard() {
       try {
         const res = await fetch('/api/admin/bookings');
         const data = await res.json();
-        console.log(data);
-        if (!res.ok) toast.error(data.error || 'Failed to fetch bookings');
-        else setBookings(data.bookings);
+        if (!res.ok) throw new Error(data.error);
+        setBookings(data.bookings);
       } catch (err) {
         console.error(err);
         toast.error('Failed to fetch bookings');
       } finally {
-        setLoading(false);
+        setLoadingBookings(false);
       }
     }
-
     fetchBookings();
   }, []);
 
-  // Fetch stations
   useEffect(() => {
     async function fetchStations() {
       try {
         const res = await fetch('/api/admin/stations');
         const data = await res.json();
-        if (res.ok) setStations(data.stations);
-        if (!res.ok) toast.error(data.error || 'Failed to fetch stations');
-        else setStations(data.stations);
+        if (!res.ok) throw new Error(data.error);
+        setStations(data.stations);
       } catch (err) {
         console.error(err);
         toast.error('Failed to fetch stations');
+      } finally {
+        setLoadingStations(false);
       }
     }
-
     fetchStations();
   }, []);
 
@@ -104,7 +103,7 @@ export default function AdminDashboard() {
         <main className='flex-1 p-6'>
           {activeTab === 'bookings' && (
             <div>
-              {loading ? (
+              {loadingBookings ? (
                 <p>Loading bookings...</p>
               ) : bookings.length === 0 ? (
                 <p>No bookings yet.</p>
@@ -146,25 +145,25 @@ export default function AdminDashboard() {
                             </td>
                             <td className='px-6 py-4'>{b.status}</td>
                             <td className='px-6 py-4 flex justify-center space-x-2'>
-                              {b.status !== 'COMPLETED' && (
-                                <button
-                                  className='bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700'
-                                  onClick={() =>
-                                    updateStatus(b.id, 'COMPLETED')
-                                  }
-                                >
-                                  Complete
-                                </button>
-                              )}
-                              {b.status !== 'CANCELLED' && (
-                                <button
-                                  className='bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700'
-                                  onClick={() =>
-                                    updateStatus(b.id, 'CANCELLED')
-                                  }
-                                >
-                                  Cancel
-                                </button>
+                              {b.status === 'PENDING' && (
+                                <>
+                                  <button
+                                    className='bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700'
+                                    onClick={() =>
+                                      updateStatus(b.id, 'COMPLETED')
+                                    }
+                                  >
+                                    Complete
+                                  </button>
+                                  <button
+                                    className='bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700'
+                                    onClick={() =>
+                                      updateStatus(b.id, 'CANCELLED')
+                                    }
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
                               )}
                             </td>
                           </tr>

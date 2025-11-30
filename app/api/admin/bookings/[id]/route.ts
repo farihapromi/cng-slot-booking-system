@@ -24,7 +24,7 @@ export async function PUT(
     if (!user)
       return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    if (user.role !== "ADMIN" ) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
@@ -34,8 +34,8 @@ export async function PUT(
     if (!booking)
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
 
-    // SUPER ADMIN can update any booking
-    if (user.role !== "SUPER_ADMIN") {
+   
+    if (user.role !== "ADMIN") {
       if (!user.stations.some((s) => s.id === booking.stationId)) {
         return NextResponse.json(
           { error: "Not authorized for this station" },

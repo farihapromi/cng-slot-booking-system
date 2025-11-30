@@ -1,14 +1,10 @@
-// app/api/admin/bookings/route.ts
-import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
-
 
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
-// GET → get all bookings for stations this admin manages
+
+
 export async function GET() {
   try {
     const clerkUser = await currentUser();
@@ -18,7 +14,7 @@ export async function GET() {
 
     const admin = await prisma.user.findUnique({
       where: { clerkId: clerkUser.id },
-      include: { stations: true } // fetch stations this admin manages
+      include: { stations: true } 
     });
 
     if (!admin) {
@@ -26,7 +22,7 @@ export async function GET() {
     }
 
     if (admin.stations.length === 0) {
-      return NextResponse.json({ bookings: [] }); // no stations assigned
+      return NextResponse.json({ bookings: [] }); 
     }
 
     const stationIds = admin.stations.map((s) => s.id);
