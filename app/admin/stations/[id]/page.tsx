@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 
 interface Booking {
@@ -20,14 +20,17 @@ interface Station {
 
 export default function ManageStation() {
   const params = useParams();
-  const stationId = params?.id; // safe optional chaining
-
-  //console.log('API params:', params);
-  //console.log(stationId);
+  const stationId = params?.id;
+  const router = useRouter();
 
   const [station, setStation] = useState<Station | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [capacity, setCapacity] = useState<number>(0);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -38,15 +41,60 @@ export default function ManageStation() {
         if (!resStation.ok) throw new Error(stationData.error);
 
         setStation(stationData.station);
+        // Prefill the form
+        setName(stationData.station.name);
+        setAddress(stationData.station.address);
+        setCapacity(stationData.station.capacity);
       } catch (err: any) {
         toast.error(err.message);
       } finally {
-        setLoading(false); // ← VERY IMPORTANT
+        setLoading(false);
       }
     }
 
     if (stationId) fetchData();
   }, [stationId]);
+
+  // Update station
+  const handleUpdate = async () => {
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/admin/stations/${stationId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, address, capacity }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      setStation(data.station);
+      toast.success('Station updated successfully!');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Delete station
+  // Delete station
+  const handleDelete = async () => {
+    try {
+      const res = await fetch(`/api/admin/stations/${stationId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json(); // now this will always work
+
+      if (!res.ok) throw new Error(data.error);
+
+      toast.success(data.message || 'Station deleted successfully');
+      router.push('/admin/dashboard'); // redirect to station list
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete station');
+    }
+  };
 
   if (loading) return <p className='p-6'>Loading station info...</p>;
   if (!station) return <p className='p-6 text-red-600'>Station not found</p>;
@@ -58,9 +106,51 @@ export default function ManageStation() {
       <h1 className='text-2xl font-bold mb-4 text-blue-600'>
         Manage Station: {station.name}
       </h1>
-      <p className='mb-2'>Address: {station.address}</p>
-      <p className='mb-4'>Capacity: {station.capacity}</p>
 
+      {/* Editable Form */}
+      <div className='mb-6 bg-white p-4 rounded shadow'>
+        <label className='block mb-2'>Name:</label>
+        <input
+          type='text'
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className='border p-2 rounded w-full mb-4'
+        />
+
+        <label className='block mb-2'>Address:</label>
+        <input
+          type='text'
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className='border p-2 rounded w-full mb-4'
+        />
+
+        <label className='block mb-2'>Capacity:</label>
+        <input
+          type='number'
+          value={capacity}
+          onChange={(e) => setCapacity(Number(e.target.value))}
+          className='border p-2 rounded w-full mb-4'
+        />
+
+        <div className='flex gap-4'>
+          <button
+            onClick={handleUpdate}
+            disabled={updating}
+            className='bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700'
+          >
+            {updating ? 'Updating...' : 'Update Station'}
+          </button>
+          <button
+            onClick={handleDelete}
+            className='bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700'
+          >
+            Delete Station
+          </button>
+        </div>
+      </div>
+
+      {/* Bookings */}
       <h2 className='text-xl font-semibold mb-2'>Bookings</h2>
       {bookings.length === 0 ? (
         <p>No bookings yet for this station.</p>

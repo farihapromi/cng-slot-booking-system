@@ -25,3 +25,50 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
+// UPDATE station
+export async function PUT(req: Request, ctx: { params: { id: string } }) {
+  const { id } = ctx.params;
+  const body = await req.json();
+  const { name, address, capacity } = body;
+
+  if (!name || !address || !capacity) {
+    return NextResponse.json({ error: "All fields required" }, { status: 400 });
+  }
+
+  const updatedStation = await prisma.station.update({
+    where: { id },
+    data: { name, address, capacity: Number(capacity) },
+  });
+
+  return NextResponse.json({ station: updatedStation });
+}
+
+
+export async function DELETE(
+  req: Request,
+  ctx: { params: Promise<{ id: string }> } // notice Promise here
+) {
+  // unwrap the promise
+  const { id } = await ctx.params;
+
+  if (!id) {
+    return NextResponse.json({ error: "Station ID is required" }, { status: 400 });
+  }
+
+  try {
+    
+    // DELETE station and its bookings manually
+await prisma.booking.deleteMany({ where: { stationId: id } });
+const deletedStation = await prisma.station.delete({ where: { id } });
+
+    return NextResponse.json({
+      message: "Station deleted successfully",
+      station: deletedStation
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err.message || "Failed to delete station" },
+      { status: 500 }
+    );
+  }
+}
