@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 
 
 
+
 export async function GET() {
   try {
     const clerkUser = await currentUser();
@@ -40,50 +41,51 @@ export async function GET() {
   }
 }
 
+
 // PUT → update booking status
-export async function PUT(req: Request) {
-  try {
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
+// export async function PUT(req: Request) {
+//   try {
+//     const clerkUser = await currentUser();
+//     if (!clerkUser) {
+//       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+//     }
 
-    const admin = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
-      include: { stations: true }
-    });
+//     const admin = await prisma.user.findUnique({
+//       where: { clerkId: clerkUser.id },
+//       include: { stations: true }
+//     });
 
-    if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 });
-    }
+//     if (!admin) {
+//       return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+//     }
 
-    const { id, status } = await req.json();
+//     const { id, status } = await req.json();
 
-    // Get booking
-    const booking = await prisma.booking.findUnique({
-      where: { id },
-    });
+//     // Get booking
+//     const booking = await prisma.booking.findUnique({
+//       where: { id },
+//     });
 
-    if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-    }
+//     if (!booking) {
+//       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+//     }
 
-    // Check if admin manages the station of this booking
-    if (!admin.stations.some((s) => s.id === booking.stationId)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+//     // Check if admin manages the station of this booking
+//     if (!admin.stations.some((s) => s.id === booking.stationId)) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+//     }
 
-    const updatedBooking = await prisma.booking.update({
-      where: { id },
-      data: { status },
-    });
+//     const updatedBooking = await prisma.booking.update({
+//       where: { id },
+//       data: { status },
+//     });
 
-    return NextResponse.json(updatedBooking);
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}
+//     return NextResponse.json(updatedBooking);
+//   } catch (err) {
+//     console.error(err);
+//     return NextResponse.json({ error: "Server error" }, { status: 500 });
+//   }
+// }
 
 export async function POST(req: Request) {
   try {

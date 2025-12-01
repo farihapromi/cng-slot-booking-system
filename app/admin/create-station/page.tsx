@@ -34,7 +34,7 @@ export default function CreateStation() {
         setCapacity(1);
 
         // Navigate to the newly created station's manage page
-        router.push(`/admin/stations`);
+        router.push(`/admin/dashboard`);
       }
     } catch (err) {
       console.error(err);

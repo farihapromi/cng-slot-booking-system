@@ -19,7 +19,7 @@ export async function POST() {
         clerkId: clerkUser.id,
         name: clerkUser.fullName,
         email: clerkUser.emailAddresses[0].emailAddress,
-        role: "ADMIN", // or "DRIVER"
+        role: "DRIVER", // or "DRIVER"
       
         stations: {
   connect: station ? { id: station.id } : undefined,

@@ -19,13 +19,24 @@ export default function AdminDashboard() {
   const [loadingStations, setLoadingStations] = useState(true);
 
   // Fetch bookings
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalBookings, setTotalBookings] = useState(0);
+
   useEffect(() => {
     async function fetchBookings() {
+      setLoadingBookings(true);
       try {
-        const res = await fetch('/api/admin/bookings');
+        const res = await fetch(
+          `/api/admin/bookings?page=${page}&limit=${limit}`
+        );
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to fetch');
+        }
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        setBookings(data.bookings);
+        setBookings(data.bookings || []);
+        setTotalBookings(data.total || 0);
       } catch (err) {
         console.error(err);
         toast.error('Failed to fetch bookings');
@@ -34,15 +45,20 @@ export default function AdminDashboard() {
       }
     }
     fetchBookings();
-  }, []);
+  }, [page, limit]);
 
   useEffect(() => {
     async function fetchStations() {
       try {
         const res = await fetch('/api/admin/stations');
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({})); // catch empty response
+          throw new Error(errData.error || 'Failed to fetch stations');
+        }
+
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        setStations(data.stations);
+        setStations(data.stations || []);
       } catch (err) {
         console.error(err);
         toast.error('Failed to fetch stations');
@@ -170,6 +186,33 @@ export default function AdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+
+                    {/* Pagination Buttons */}
+                    <div className='flex justify-between mt-4'>
+                      <button
+                        className='px-4 py-2 bg-gray-300 rounded hover:bg-gray-400'
+                        disabled={page === 1}
+                        onClick={() => setPage((prev) => prev - 1)}
+                      >
+                        Previous
+                      </button>
+
+                      <span className='px-4 py-2'>
+                        Page {page} of{' '}
+                        {totalBookings ? Math.ceil(totalBookings / limit) : 1}
+                      </span>
+
+                      <button
+                        className='px-4 py-2 bg-gray-300 rounded hover:bg-gray-400'
+                        disabled={
+                          page >=
+                          (totalBookings ? Math.ceil(totalBookings / limit) : 1)
+                        }
+                        onClick={() => setPage((prev) => prev + 1)}
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
